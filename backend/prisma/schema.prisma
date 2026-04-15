@@ -1,0 +1,84 @@
+// Prisma client generator → creates JS/TS client to interact with DB
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma" // custom output folder for better project structure
+}
+
+// Database connection (configured via prisma.config.ts in Prisma v7)
+datasource db {
+  provider = "postgresql"
+}
+
+// =====================
+// COMPANY (ROOT ENTITY)
+// =====================
+model Company {
+  id        String   @id @default(uuid()) // Primary key (UUID for global uniqueness)
+  name      String                        // Company name (required)
+  type      String                        // HQ / Franchise (business type)
+
+  email     String?                       // Optional contact email
+  phone     String?                       // Optional phone number
+  address   String?                       // Optional address
+  city      String?                       // Optional city
+  state     String?                       // Optional state
+  country   String?                       // Optional country
+  timezone  String?                       // Needed for operations/logging across regions
+
+  createdAt DateTime @default(now())     // Auto timestamp when company is created
+
+  // Relations
+  users      User[]                      // One company → many users
+  warehouses Warehouse[]                // One company → many warehouses
+}
+
+// =====================
+// WAREHOUSE (OPERATIONAL UNIT)
+// =====================
+model Warehouse {
+  id        String   @id @default(uuid()) // Unique warehouse ID
+  name      String                        // Warehouse name
+  address   String                        // Physical address
+  city      String                        // City (important for routing/logistics)
+
+  companyId String                        // Foreign key → which company owns this warehouse
+  company   Company @relation(fields: [companyId], references: [id])
+  // Relation: many warehouses belong to one company
+
+  userWarehouses UserWarehouse[]         // Many-to-many mapping with users
+}
+
+// =====================
+// USER (SYSTEM ACTOR)
+// =====================
+model User {
+  id        String   @id @default(uuid()) // Unique user ID
+  email     String   @unique              // Login email (must be unique)
+  password  String                        // Hashed password (never store plain text)
+  role      String   @default("CASHIER")  // Default role (can be extended later)
+  createdAt DateTime @default(now())     // Account creation timestamp
+
+  companyId String                        // Foreign key → user belongs to which company
+  company   Company @relation(fields: [companyId], references: [id])
+  // Relation: many users belong to one company
+
+  userWarehouses UserWarehouse[]         // Many-to-many mapping with warehouses
+}
+
+// =====================
+// USER ↔ WAREHOUSE (MAPPING TABLE)
+// =====================
+model UserWarehouse {
+  id          String @id @default(uuid()) // Unique mapping ID
+
+  userId      String                      // FK → User
+  warehouseId String                      // FK → Warehouse
+
+  user        User      @relation(fields: [userId], references: [id])
+  warehouse   Warehouse @relation(fields: [warehouseId], references: [id])
+  // Defines many-to-many relation:
+  // One user → multiple warehouses
+  // One warehouse → multiple users
+
+  assignedAt  DateTime @default(now())   // Track when user was assigned to warehouse
+}
