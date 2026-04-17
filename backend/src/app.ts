@@ -4,9 +4,9 @@ import authRoutes from "./modules/auth/auth.route";
 
 const app = express();
 
-//Use cors here 
+app.use(express.json({ type: ["application/json", "text/plain"] }));
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
-app.use(express.json());
 
 // routes
 app.use("/api/auth", authRoutes);
