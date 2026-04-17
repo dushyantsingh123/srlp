@@ -1,7 +1,6 @@
 // Prisma client generator → creates JS/TS client to interact with DB
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma" // custom output folder for better project structure
 }
 
 // Database connection (configured via prisma.config.ts in Prisma v7)
