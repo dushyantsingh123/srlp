@@ -1,19 +1,19 @@
 import prisma from "../../config/prisma";
 import bcrypt from "bcrypt";
-
-// ✅ Define type instead of any
-interface RegisterInput {
-  companyName: string;
-  name: string;
-  email: string;
-  password: string;
-}
+import * as jwt from "jsonwebtoken";
+import { RegisterInput, LoginInput } from "./auth.types";
 
 export const registerUser = async (data: RegisterInput) => {
   const { companyName, name, email, password } = data;
 
+  if (!companyName || !name || !email || !password) {
+    throw new Error("All fields are required");
+  }
+
+  const normalizedEmail = email.toLowerCase();
+
   const existingUser = await prisma.user.findUnique({
-    where: { email },
+    where: { email: normalizedEmail },
   });
 
   if (existingUser) {
@@ -22,35 +22,94 @@ export const registerUser = async (data: RegisterInput) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const result = await prisma.$transaction(async (tx) => {
-    const company = await tx.company.create({
-      data: {
-        name: companyName,
-        type: "HQ", // ✅ or "RETAIL" or "FRANCHISE"
-      },
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const company = await tx.company.create({
+        data: {
+          name: companyName,
+          type: "HQ",
+        },
+      });
+
+      const user = await tx.user.create({
+        data: {
+          name,
+          email: normalizedEmail,
+          password: hashedPassword,
+          companyId: company.id,
+        },
+      });
+
+      return { company, user };
     });
 
-    const user = await tx.user.create({
+    return {
+      message: "User registered successfully",
       data: {
-        name,
-        email,
-        password: hashedPassword,
-        companyId: company.id,
+        company: result.company,
+        user: {
+          id: result.user.id,
+          name: result.user.name,
+          email: result.user.email,
+        },
       },
-    });
+    };
+  } catch (error: any) {
+    if (error.code === "P2002") {
+      throw new Error("User already exists");
+    }
+    throw error;
+  }
+};
 
-    return { company, user };
+export const loginUser = async (data: LoginInput) => {
+  const { email, password } = data;
+
+  if (!email || !password) {
+    throw new Error("All fields are required");
+  }
+
+  const normalizedEmail = email.toLowerCase();
+
+  const existingUser = await prisma.user.findUnique({
+    where: { email: normalizedEmail },
   });
 
+  if (!existingUser) {
+    throw new Error("Invalid email or password");
+  }
+
+  const isMatched = await bcrypt.compare(password, existingUser.password);
+
+  if (!isMatched) {
+    throw new Error("Invalid email or password");
+  }
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error("JWT secret not configured");
+  }
+
+  const token = jwt.sign(
+    {
+      userId: existingUser.id,
+      companyId: existingUser.companyId,
+      role: existingUser.role,
+    },
+    secret,
+    {
+      expiresIn: (process.env.JWT_EXPIRES_IN || "1d") as any,
+    }
+  );
+
   return {
-    message: "User registered successfully",
+    message: "Login successful",
     data: {
-      company: result.company,
       user: {
-        id: result.user.id,
-        name: result.user.name,
-        email: result.user.email,
+        id: existingUser.id,
+        name: existingUser.name,
+        email: existingUser.email,
       },
+      token,
     },
   };
 };
