@@ -7,7 +7,19 @@ const logger = winston.createLogger({
     winston.format.json()
   ),
   transports: [
-    new winston.transports.Console(),
+    // new winston.transports.Console(),
+    new winston.transports.File({ filename: "logs/combined.log" }),
+
+    // ✅ All logs
+    new winston.transports.File({
+      filename: "logs/combined.log",
+    }),
+
+    // ❌ Only errors
+    new winston.transports.File({
+      filename: "logs/error.log",
+      level: "error",
+    }),
   ],
 });
 

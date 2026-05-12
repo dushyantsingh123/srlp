@@ -4,6 +4,8 @@ import authRoutes from "./modules/auth/auth.route";
 import { Request, Response, NextFunction } from 'express';
 import morgan from "morgan";
 import logger from "./utils/logger";
+import fs from "fs";
+import path from "path";
 
 
 const app = express();
@@ -12,11 +14,14 @@ app.use(express.json({ type: ["application/json", "text/plain"] }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
+const accessLogStream = fs.createWriteStream(
+  path.join("logs", "access.log"),
+  { flags: "a" }
+);
+
 app.use(
   morgan("combined", {
-    stream: {
-      write: (message) => logger.info(message.trim()),
-    },
+    stream: accessLogStream,
   })
 );
 

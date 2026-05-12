@@ -2,11 +2,13 @@ import prisma from "../../config/prisma";
 import bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
 import { RegisterInput, LoginInput } from "./auth.types";
+import logger from "../../utils/logger";
 
 export const registerUser = async (data: RegisterInput) => {
   const { companyName, name, email, password } = data;
 
   if (!companyName || !name || !email || !password) {
+    logger.warn("Register failed - missing fields");
     throw new Error("All fields are required");
   }
 
@@ -17,6 +19,9 @@ export const registerUser = async (data: RegisterInput) => {
   });
 
   if (existingUser) {
+    logger.warn("Register failed - user already exists", {
+      email: normalizedEmail,
+    });
     throw new Error("User already exists");
   }
 
@@ -43,6 +48,13 @@ export const registerUser = async (data: RegisterInput) => {
       return { company, user };
     });
 
+    // ✅ SUCCESS LOG
+    logger.info("User registered successfully", {
+      userId: result.user.id,
+      email: result.user.email,
+      companyId: result.company.id,
+    });
+
     return {
       message: "User registered successfully",
       data: {
@@ -55,6 +67,11 @@ export const registerUser = async (data: RegisterInput) => {
       },
     };
   } catch (error: any) {
+    // ❌ ERROR LOG
+    logger.error("Register transaction failed", {
+      error: error.message,
+    });
+
     if (error.code === "P2002") {
       throw new Error("User already exists");
     }
@@ -66,6 +83,7 @@ export const loginUser = async (data: LoginInput) => {
   const { email, password } = data;
 
   if (!email || !password) {
+    logger.warn("Login failed - missing fields");
     throw new Error("All fields are required");
   }
 
@@ -76,16 +94,24 @@ export const loginUser = async (data: LoginInput) => {
   });
 
   if (!existingUser) {
+    logger.warn("Login failed - user not found", {
+      email: normalizedEmail,
+    });
     throw new Error("Invalid email or password");
   }
 
   const isMatched = await bcrypt.compare(password, existingUser.password);
 
   if (!isMatched) {
+    logger.warn("Login failed - invalid password", {
+      email: normalizedEmail,
+    });
     throw new Error("Invalid email or password");
   }
+
   const secret = process.env.JWT_SECRET;
   if (!secret) {
+    logger.error("JWT secret missing");
     throw new Error("JWT secret not configured");
   }
 
@@ -100,6 +126,12 @@ export const loginUser = async (data: LoginInput) => {
       expiresIn: (process.env.JWT_EXPIRES_IN || "1d") as any,
     }
   );
+
+  // ✅ SUCCESS LOG
+  logger.info("User login successful", {
+    userId: existingUser.id,
+    companyId: existingUser.companyId,
+  });
 
   return {
     message: "Login successful",
