@@ -1,25 +1,16 @@
 import { Request, Response } from "express";
+import asyncHandler from "../../utils/asyncHandler";
+import { sendSuccess } from "../../shared/helpers/response";
 import { loginUser, registerUser } from "./auth.service";
 
-export const register = async (req: Request, res: Response) => {
-  try {
-    const result = await registerUser(req.body);
+export const register = asyncHandler(async (req: Request, res: Response) => {
+  const result = await registerUser(req.body);
 
-    res.status(201).json(result);
-  } catch (error: any) {
-    res.status(400).json({
-      message: error.message || "Something went wrong",
-    });
-  }
-};
+  sendSuccess(res, 201, result.message, result.data);
+});
 
-export const login = async (req: Request, res: Response) => {
-  try {
-    const result = await loginUser(req.body);
-    res.status(200).json(result);
-  } catch (error: any) {
-    res.status(400).json({
-        message: error.message || "Something went wrong",
-    })
-  }
-}
+export const login = asyncHandler(async (req: Request, res: Response) => {
+  const result = await loginUser(req.body);
+
+  sendSuccess(res, 200, result.message, result.data);
+});

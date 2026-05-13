@@ -3,8 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "ts-node-dev src/server.ts"
+    "dev": "ts-node-dev src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "prisma:validate": "prisma validate",
+    "test:unit": "vitest run",
+    "test": "npm run typecheck && npm run prisma:validate && npm run test:unit"
   },
   "keywords": [],
   "author": "",
@@ -21,7 +24,8 @@
     "morgan": "^1.10.1",
     "pg": "^8.20.0",
     "prisma": "^7.7.0",
-    "winston": "^3.19.0"
+    "winston": "^3.19.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
@@ -32,6 +36,7 @@
     "@types/node": "^25.6.0",
     "@types/pg": "^8.20.0",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "vitest": "^4.1.6"
   }
 }

@@ -1,4 +1,7 @@
+import fs from "fs";
 import winston from "winston";
+
+fs.mkdirSync("logs", { recursive: true });
 
 const logger = winston.createLogger({
   level: "info",
@@ -7,15 +10,15 @@ const logger = winston.createLogger({
     winston.format.json()
   ),
   transports: [
-    // new winston.transports.Console(),
-    new winston.transports.File({ filename: "logs/combined.log" }),
-
-    // ✅ All logs
+    // new winston.transports.Console({
+    //   format: winston.format.combine(
+    //     winston.format.colorize(),
+    //     winston.format.simple()
+    //   ),
+    // }),
     new winston.transports.File({
       filename: "logs/combined.log",
     }),
-
-    // ❌ Only errors
     new winston.transports.File({
       filename: "logs/error.log",
       level: "error",

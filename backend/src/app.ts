@@ -1,23 +1,33 @@
-import express from "express";
 import cors from "cors";
-import authRoutes from "./modules/auth/auth.route";
-import { Request, Response, NextFunction } from 'express';
-import morgan from "morgan";
-import logger from "./utils/logger";
+import express from "express";
 import fs from "fs";
+import morgan from "morgan";
 import path from "path";
-
+import env from "./config/env";
+import { errorMiddleware } from "./middlewares/error.middleware";
+import {
+  requestIdMiddleware,
+  requestLogger,
+} from "./monitoring/request.logger";
+import authRoutes from "./modules/auth/auth.route";
 
 const app = express();
 
+app.use(requestIdMiddleware);
+app.use(requestLogger);
 app.use(express.json({ type: ["application/json", "text/plain"] }));
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
-
-const accessLogStream = fs.createWriteStream(
-  path.join("logs", "access.log"),
-  { flags: "a" }
+app.use(
+  cors({
+    origin: env.corsOrigin || true,
+  })
 );
+
+fs.mkdirSync("logs", { recursive: true });
+
+const accessLogStream = fs.createWriteStream(path.join("logs", "access.log"), {
+  flags: "a",
+});
 
 app.use(
   morgan("combined", {
@@ -25,12 +35,8 @@ app.use(
   })
 );
 
-// routes
 app.use("/api/auth", authRoutes);
 
-app.use((err:any,req:Request,res:Response,next:NextFunction) => {
-    console.error(err.stack);
-    res.status(500).json({message: err.message})
-})
+app.use(errorMiddleware);
 
 export default app;

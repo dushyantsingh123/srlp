@@ -1,0 +1,33 @@
+import { z } from "zod";
+
+export const registerSchema = z.object({
+  companyName: z
+    .string()
+    .trim()
+    .min(1, "Company name is required"),
+  name: z
+    .string()
+    .trim()
+    .min(1, "Name is required"),
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required")
+    .email("Invalid email address")
+    .toLowerCase(),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters long"),
+});
+
+export const loginSchema = z.object({
+  email: z
+    .string()
+    .trim()
+    .min(1, "Email is required")
+    .email("Invalid email address")
+    .toLowerCase(),
+  password: z
+    .string()
+    .min(1, "Password is required"),
+});
