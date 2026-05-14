@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
-import { JwtService, JWTPayload } from "../../src/security/jwt.service";
+import { JwtService } from "../../src/security/jwt.service";
+import { JWTPayload } from "../../src/modules/auth/auth.validation";
 
 // Mock the environment config
 vi.mock("../../src/config/env", () => ({

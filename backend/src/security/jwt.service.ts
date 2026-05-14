@@ -1,11 +1,6 @@
 import * as jwt from "jsonwebtoken";
 import env from "../config/env";
-
-export type JWTPayload = {
-  userId: string;
-  companyId: string;
-  role: string;
-};
+import { JWTPayload } from "../modules/auth/auth.validation";
 
 export class JwtService {
   /**

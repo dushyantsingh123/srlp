@@ -10,6 +10,7 @@ import {
   requestLogger,
 } from "./monitoring/request.logger";
 import authRoutes from "./modules/auth/auth.route";
+import aiRoutes from "./modules/ai/ai.route";
 
 const app = express();
 
@@ -36,6 +37,7 @@ app.use(
 );
 
 app.use("/api/auth", authRoutes);
+app.use("/api/ai", aiRoutes);
 
 app.use(errorMiddleware);
 

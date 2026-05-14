@@ -20,6 +20,8 @@ export const registerSchema = z.object({
     .min(6, "Password must be at least 6 characters long"),
 });
 
+export type RegisterInput = z.infer<typeof registerSchema>;
+
 export const loginSchema = z.object({
   email: z
     .string()
@@ -31,3 +33,13 @@ export const loginSchema = z.object({
     .string()
     .min(1, "Password is required"),
 });
+
+export type LoginInput = z.infer<typeof loginSchema>;
+
+export const jwtPayloadSchema = z.object({
+  userId: z.string(),
+  companyId: z.string(),
+  role: z.string(),
+});
+
+export type JWTPayload = z.infer<typeof jwtPayloadSchema>;

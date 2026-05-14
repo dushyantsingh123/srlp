@@ -7,6 +7,7 @@ type Env = {
   port: number;
   nodeEnv: string;
   corsOrigin: string | undefined;
+  geminiApiKey: string;
 };
 
 const required = (key: string): string => {
@@ -55,6 +56,7 @@ const env: Env = {
   port: parsePort(process.env.PORT),
   nodeEnv: process.env.NODE_ENV?.trim() || "development",
   corsOrigin: optionalString(process.env.CORS_ORIGIN),
+  geminiApiKey: required("GEMINI_API_KEY"),
 };
 
 export default env;

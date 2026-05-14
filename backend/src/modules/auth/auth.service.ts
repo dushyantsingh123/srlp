@@ -3,7 +3,7 @@ import { JwtService } from "../../security/jwt.service";
 import { PasswordService } from "../../security/password.service";
 import ApiError from "../../shared/helpers/ApiError";
 import logger from "../../monitoring/logger";
-import { LoginInput, RegisterInput } from "../../types/auth.types";
+import { LoginInput, RegisterInput } from "./auth.validation";
 import {
   createCompanyWithUser,
   findUserByEmail,
