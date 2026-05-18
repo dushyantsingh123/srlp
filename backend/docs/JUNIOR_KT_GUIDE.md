@@ -30,17 +30,19 @@ flowchart LR
   B --> C[src/app.ts]
   C --> D[Global Middleware]
   D --> E[Route: src/modules/<feature>/*.route.ts]
-  E --> F[validate.middleware.ts]
-  F --> G[Controller]
-  G --> H[Service]
-  H --> I[(Repository / Prisma / External API)]
-  H --> G
-  G --> J[sendSuccess helper]
-  J --> K[Client Response]
-  G -. throw error .-> L[error.middleware.ts]
-  H -. throw error .-> L
-  F -. validation error .-> L
-  L --> M[Error Response]
+  E --> F["auth.middleware.ts (if protected)"]
+  F --> G[validate.middleware.ts]
+  G --> H[Controller]
+  H --> I[Service]
+  I --> J[(Repository / Prisma / External API)]
+  I --> H
+  H --> K[sendSuccess helper]
+  K --> L[Client Response]
+  H -. throw error .-> M[error.middleware.ts]
+  I -. throw error .-> M
+  F -. auth error .-> M
+  G -. validation error .-> M
+  M --> N[Error Response]
 ```
 
 ---

@@ -62,11 +62,13 @@ For each module:
 
 ### Request flow example
 
-`route -> validateBody(schema) -> controller -> service -> (repository/prisma/external) -> controller -> response`
+- **Public Route**: `route -> validateBody(schema) -> controller -> service -> controller -> response`
+- **Protected Route**: `route -> authMiddleware -> (roleMiddleware) -> validateBody(schema) -> controller -> service -> controller -> response`
 
 ### Who calls whom (important for new developers)
 
-- `route` calls middleware and then controller.
+- `route` calls middlewares (like `authMiddleware` and `validateBody`) and then `controller`.
+- `authMiddleware` verifies JWT and attaches `req.user` for downstream context.
 - `validation` is used by `route` (not by service directly).
 - `controller` calls only `service` and `sendSuccess`.
 - `service` calls `repository` (if present), `prisma` (if needed), logger, security/shared helpers.
