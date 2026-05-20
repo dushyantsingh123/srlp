@@ -1,6 +1,9 @@
 export enum UserRole {
   ADMIN = "ADMIN",
   USER = "USER",
+  CASHIER = "CASHIER",
+  MANAGER = "MANAGER",
+  SALES = "SALES",
 }
 
 export const AUTH_MESSAGES = {
@@ -13,6 +16,8 @@ export const AUTH_MESSAGES = {
   UNAUTHORIZED_INVALID_TOKEN: "Unauthorized: invalid token",
   UNAUTHORIZED_MALFORMED_TOKEN: "Unauthorized: malformed token",
   GET_ME_SUCCESS: "User fetched successfully",
+  UNAUTHORIZED_FORBIDDEN: "Forbidden: you do not have permission to perform this action",
 };
+
 
 
